@@ -1,28 +1,39 @@
-import axios from "axios";
+import { supabase } from "../utilsHelper/supabaseClient";
 
-const API_BASE = "https://dummyjson.com";
 
 export const getTopDeals = async () => {
-  return await axios.get(`${API_BASE}/products?limit=4`);
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .limit(4);
+  if (error) throw error;
+  return data;
 };
 
 export const getNewArrivals = async () => {
-  return await axios.get(`${API_BASE}/products?skip=4&limit=4`);
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .range(4, 7); // skip 4, get 4
+  if (error) throw error;
+  return data;
 };
 
-// New function to fetch all products with optional filters
 export const getAllProducts = async () => {
-  return await axios.get(`${API_BASE}/products?limit=100`);
+  const { data, error } = await supabase
+    .from("products")
+    .select("*");
+  if (error) throw error;
+  return data;
 };
 
-// New function to fetch products by multiple categories
 export const getProductsByCategories = async (categories: string[]) => {
-  let allProducts = [];
-  for (const category of categories) {
-    const res = await axios.get(`${API_BASE}/products/category/${category}`);
-    allProducts = allProducts.concat(res.data.products);
-  }
-  return allProducts;
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .in("category", categories);
+  if (error) throw error;
+  return data;
 };
 
 export const getProductsByCategoryAndPage = async (
@@ -30,12 +41,16 @@ export const getProductsByCategoryAndPage = async (
   page: number,
   limit: number = 8
 ) => {
-  const skip = (page - 1) * limit;
-  const url =
-    category === "All"
-      ? `${API_BASE}/products?limit=${limit}&skip=${skip}`
-      : `${API_BASE}/products/category/${category.toLowerCase()}?limit=${limit}&skip=${skip}`;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  const res = await axios.get(url);
-  return res.data.products;
+  let query = supabase.from("products").select("*").range(from, to);
+
+  if (category !== "All") {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
 };

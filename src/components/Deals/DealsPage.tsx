@@ -19,8 +19,8 @@ export default function DealsPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await getAllProducts();
-        setProducts(response.data.products); // if axios response
+        const data = await getAllProducts();
+        setProducts(data);
       } catch (err) {
         console.error("Error fetching products:", err);
       } finally {
@@ -65,7 +65,7 @@ export default function DealsPage() {
           if (!activeFilters.includes(discount)) return true;
           const discountValue = parseInt(discount.replace("% off", ""));
           const actualDiscount = Math.round(
-            ((product.price - product.discountedPrice || product.price * (1 - product.discountPercentage / 100)) /
+            ((product.price - (product.discountedPrice || product.price * (1 - product.discountPercentage / 100))) /
               product.price) *
               100
           );
@@ -82,55 +82,35 @@ export default function DealsPage() {
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
       />
-      <main className="flex flex-col items-start bg-white w-[1280px] max-md:w-full max-md:max-w-screen-lg max-sm:w-full">
+      <main className="flex flex-col items-start bg-white w-full max-w-screen-xl mx-auto">
         <div className="flex flex-col items-start self-stretch bg-white min-h-[800px]">
           <div className="flex flex-col items-start self-stretch">
-            <div className="flex justify-center items-start self-stretch px-40 py-5 flex-[1_0_0] max-md:px-10 max-md:py-5 max-sm:px-5 max-sm:py-4">
-              <div className="flex flex-col items-start flex-[1_0_0] max-w-[960px] max-md:max-w-full">
+            <div className="flex justify-center items-start self-stretch px-6 py-5 md:px-10">
+              <div className="flex flex-col items-start flex-1 w-full max-w-6xl">
                 {/* Header */}
-                <header className="flex flex-wrap gap-y-3 justify-between content-start items-start self-stretch p-4 max-sm:p-3">
-                  <div className="flex flex-col items-start w-72 min-w-72">
-                    <h1 className="self-stretch text-3xl font-bold leading-10 text-neutral-900 max-sm:text-3xl max-sm:leading-9">
-                      Deals
-                    </h1>
-                  </div>
+                <header className="flex flex-wrap gap-y-3 justify-between items-center self-stretch p-4">
+                  <h1 className="text-3xl font-bold text-neutral-900">Deals</h1>
                 </header>
 
                 {/* Search */}
-                <section className="flex flex-col items-start self-stretch px-4 py-3 max-sm:px-3 max-sm:py-2">
+                <section className="self-stretch px-4 py-3">
                   <SearchInput placeholder="Search Deals" onSearch={handleSearch} />
                 </section>
 
-            
-
                 {/* Product Grid */}
-                <section className="flex flex-col gap-3 items-start self-stretch p-4 max-sm:p-3">
+                <section className="p-4">
                   {loading ? (
                     <p className="text-gray-500">Loading products...</p>
                   ) : filteredProducts.length === 0 ? (
                     <p className="text-gray-500">No products match your filters.</p>
                   ) : (
-                    <div className="flex flex-wrap gap-3 justify-start w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                       {filteredProducts.map((product) => (
-                        <ProductCard
-                          key={product.id}
-                          image={product.thumbnail}
-                          altText={product.title}
-                          title={product.title}
-                          originalPrice={`$${product.price}`}
-                          discountedPrice={`$${Math.round(
-                            product.price * (1 - product.discountPercentage / 100)
-                          )}`}
-                          discountPercentage={`${product.discountPercentage}% off`}
-                          rating={product.rating}               // ✅ Add this
-                          price={product.price}                 // ✅ Add this if you need to show it separately
-                        />
-
+                        <ProductCard key={product.id} product={product} />
                       ))}
                     </div>
                   )}
                 </section>
-
               </div>
             </div>
           </div>

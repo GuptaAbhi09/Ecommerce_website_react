@@ -1,13 +1,13 @@
 import * as React from "react";
 import { ProductCard } from "./ProductCard";
 
-interface Product {
+export interface Product {
   id: string;
   imageUrl: string;
   title: string;
+  description: string;
   price: string;
-  imageAspectRatio?: string;
-  imageWidth?: string;
+  rating?: number;
 }
 
 interface ProductGridProps {
@@ -16,7 +16,7 @@ interface ProductGridProps {
   containerClassName?: string;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({
+const ProductGrid: React.FC<ProductGridProps> = ({
   title,
   products,
   containerClassName = "flex flex-wrap gap-3 p-4 min-w-60 max-md:max-w-full",
@@ -28,12 +28,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       </header>
       <div className="flex items-start w-full max-md:max-w-full">
         <div className={containerClassName}>
-          {products.map((product, index) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
-
           ))}
         </div>
       </div>
     </section>
   );
 };
+
+export default ProductGrid;

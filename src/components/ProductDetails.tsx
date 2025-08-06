@@ -1,22 +1,37 @@
+"use client";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { supabase } from "../utilsHelper/supabaseClient";
 
 export const ProductDetails = ({ cartItems, setCartItems }: any) => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
 
   useEffect(() => {
-    fetch(`https://dummyjson.com/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => setProduct(data))
-      .catch((err) => console.error("Error fetching product details:", err));
+    const fetchProduct = async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single(); // since we want only 1 product
+
+      if (error) {
+        console.error("Error fetching product details:", error);
+      } else {
+        setProduct(data);
+      }
+    };
+
+    fetchProduct();
   }, [id]);
 
   const handleAddToCart = () => {
-    const exists = cartItems.find((item) => item.id === product.id);
+    const exists = cartItems.find((item: any) => item.id === product.id);
     if (exists) {
-      const updated = cartItems.map((item) =>
-        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      const updated = cartItems.map((item: any) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       );
       setCartItems(updated);
     } else {
@@ -26,7 +41,7 @@ export const ProductDetails = ({ cartItems, setCartItems }: any) => {
           id: product.id,
           name: product.title,
           price: product.price,
-          image: product.thumbnail,
+          image: product.thumbnail, 
           quantity: 1,
         },
       ]);
@@ -54,10 +69,13 @@ export const ProductDetails = ({ cartItems, setCartItems }: any) => {
             <p><span className="font-semibold">Brand:</span> {product.brand}</p>
             <p><span className="font-semibold">Category:</span> {product.category}</p>
             <p><span className="font-semibold">Stock:</span> {product.stock > 0 ? `${product.stock} Available` : "Out of stock"}</p>
-            <p><span className="font-semibold">Discount:</span> {product.discountPercentage}% off</p>
+            <p><span className="font-semibold">Discount:</span> {product.discount_percentage}% off</p>
           </div>
 
-          <button onClick={handleAddToCart} className="mt-6 px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800">
+          <button
+            onClick={handleAddToCart}
+            className="mt-6 px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800"
+          >
             Add to Cart
           </button>
         </div>

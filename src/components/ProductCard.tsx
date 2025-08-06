@@ -1,16 +1,14 @@
+"use client";
 import * as React from "react";
-import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface Product {
   id: string;
   imageUrl: string;
   title: string;
+  description: string;
   price: string;
   rating?: number;
-  popularity?: number;
-  imageAspectRatio?: string;
-  imageWidth?: string;
 }
 
 interface ProductCardProps {
@@ -18,48 +16,36 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const {
-    id,
-    imageUrl,
-    title,
-    price,
-    rating,
-    popularity,
-    imageAspectRatio = "aspect-[1.77]",
-    imageWidth = "w-[161px]",
-  } = product;
-
   return (
-    <Link to={`/product/${id}`}>
-      <article className="flex-1 shrink rounded-lg shadow-md p-4 basis-0 min-w-40 hover:scale-105 transition-transform duration-200 bg-white">
-        <img
-          src={imageUrl}
-          alt={title}
-          className={`object-contain rounded-lg ${imageAspectRatio} ${imageWidth}`}
-        />
-        <div className="mt-4 w-full space-y-1">
-          <h3 className="text-base font-medium text-neutral-900">{title}</h3>
-          <p className="text-sm text-slate-500">{price}</p>
+    <Link to={`/product/${product.id}`}>
+      <div
+      className="w-[180px] max-md:w-full rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all bg-white"
+      aria-label={`Product card for ${product.title}`}
+    >
+      <img
+        src={product.imageUrl}
+        alt={product.title}
+        className="h-[150px] w-full object-cover"
+      />
 
-          {rating !== undefined && (
-            <div className="flex items-center gap-1 text-yellow-500 text-sm">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={14}
-                  fill={i < Math.round(rating) ? "currentColor" : "none"}
-                  stroke="currentColor"
-                />
-              ))}
-              <span className="text-neutral-700 ml-1">({rating.toFixed(1)})</span>
-            </div>
-          )}
+      <div className="p-4 flex flex-col gap-1">
+        <h3 className="text-base font-semibold truncate" title={product.title}>
+          {product.title}
+        </h3>
 
-          {popularity !== undefined && (
-            <p className="text-xs text-gray-400">Popularity: {popularity}</p>
-          )}
-        </div>
-      </article>
+        <p className="text-xs text-gray-600 line-clamp-2" title={product.description}>
+          {product.description}
+        </p>
+
+        <p className="text-md font-medium text-indigo-600 mt-2">
+          ${product.price}
+        </p>
+
+        {product.rating !== undefined && (
+          <p className="text-sm text-yellow-500">⭐ {product.rating}/5</p>
+        )}
+      </div>
+    </div>
     </Link>
   );
 };

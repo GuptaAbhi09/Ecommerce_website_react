@@ -13,6 +13,7 @@ import Signup from '../components/Authentication/Signup'
 import ForgotPassword from '../components/Authentication/ForgotPassword'
 import ProtectedRoute from '../components/ProtectedRoute'
 import { ProductDetails } from '../components/ProductDetails'
+import AddProductSection from '../components/Add_Product/AddProductSection'
 
 const Routing = () => {
   const [cartItems, setCartItems] = useState<any[]>([]);
@@ -35,6 +36,7 @@ const Routing = () => {
             <CheckoutForm />
           </ProtectedRoute>
         } />
+        <Route path='/addProductSection' element={<AddProductSection />} />
     </Routes>
   )
 }
