@@ -1,38 +1,22 @@
 import * as React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "../utilsHelper/supabaseClient";
-
+import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
+import { User, LogOut, ShoppingCart, Menu, X, Settings } from "lucide-react";
 
 export const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const { user, signOut, isAuthenticated, loading } = useAuth();
+  const { getCartTotals } = useCart();
+  const { itemCount } = getCartTotals();
+
   const handleToggle = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
-    };
-
-    getSession();
-
-    // Listen to auth changes (login/logout)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    // Clean up listener
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsLoggedIn(false); // optional, will auto-set via listener
+    await signOut();
+    closeMenu();
   };
-
 
   return (
     <header className="w-full border-b border-gray-200 px-6 py-4">
@@ -51,61 +35,214 @@ export const Header: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6 text-sm font-medium items-center">
-          <NavLink to="/" className={({ isActive }) => isActive ? "text-orange-700" : ""}>Home</NavLink>
-          <NavLink to="/product" className={({ isActive }) => isActive ? "text-orange-700" : ""}>Product</NavLink>
-          <NavLink to="/deals" className={({ isActive }) => isActive ? "text-orange-700" : ""}>Deals</NavLink>
-          <NavLink to="/about" className={({ isActive }) => isActive ? "text-orange-700" : ""}>About</NavLink>
-          <NavLink to="/contact" className={({ isActive }) => isActive ? "text-orange-700" : ""}>Contact</NavLink>
+          <NavLink
+            to="/"
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to="/product"
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Product
+          </NavLink>
+          <NavLink
+            to="/deals"
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Deals
+          </NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            About
+          </NavLink>
+          <NavLink
+            to="/contact"
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Contact
+          </NavLink>
         </nav>
-        
 
-        <div className="flex gap-5">
+        <div className="flex items-center gap-4">
           {/* Cart Icon - Desktop */}
-        <NavLink to="/cart" className="hidden md:flex w-10 h-10 bg-gray-100 rounded-lg items-center justify-center">
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/263/263142.png"
-            alt="Cart"
-            className="w-5 h-5 object-contain"
-          />
-        </NavLink>
-        {/* Auth Buttons - Desktop */}
-          {!isLoggedIn ? (
-            <>
-              <NavLink to="/login" className="hidden md:flex px-4 py-2 bg-sky-500 hover:bg-sky-600 text-base font-semibold text-white rounded-lg cursor-pointer">Login</NavLink>
-              <NavLink to="/signup" className="hidden md:flex px-4 py-2 bg-sky-500 hover:bg-sky-600 text-base font-semibold text-white rounded-lg cursor-pointer">Signup</NavLink>
-            </>
+          <NavLink
+            to="/cart"
+            className="hidden md:flex relative w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-lg items-center justify-center transition-colors"
+          >
+            <ShoppingCart className="w-5 h-5 text-gray-600" />
+            {itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
+            )}
+          </NavLink>
+
+          {/* Auth Section - Desktop */}
+          {loading ? (
+            <div className="hidden md:flex items-center gap-2">
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          ) : !isAuthenticated ? (
+            <div className="hidden md:flex items-center gap-3">
+              <NavLink
+                to="/login"
+                className="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+              >
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Sign Up
+              </NavLink>
+            </div>
           ) : (
-            <button onClick={handleLogout} className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-base font-semibold text-white rounded-lg cursor-pointer">Logout</button>
+            <div className="hidden md:flex items-center gap-3">
+              {/* User Profile Dropdown */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.user_metadata?.name ||
+                    user?.email?.split("@")[0] ||
+                    "User"}
+                </span>
+              </div>
+              <NavLink
+                to="/profile"
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="text-sm font-medium">Profile</span>
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
+            </div>
           )}
         </div>
 
         {/* Hamburger Menu - Mobile Only */}
         <button className="md:hidden" onClick={handleToggle}>
-          <span className="text-2xl font-bold">{menuOpen ? "✕" : "☰"}</span>
+          {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="mt-4 flex flex-col gap-3 md:hidden text-sm font-medium">
-          <NavLink to="/" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>Home</NavLink>
-          <NavLink to="/product" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>Product</NavLink>
-          <NavLink to="/deals" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>Deals</NavLink>
-          <NavLink to="/about" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>About</NavLink>
-          <NavLink to="/contact" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>Contact</NavLink>
-          <NavLink to="/cart" onClick={closeMenu} className={({ isActive }) => isActive ? "text-orange-700" : ""}>Cart</NavLink>
+          <NavLink
+            to="/"
+            onClick={closeMenu}
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Home
+          </NavLink>
+          <NavLink
+            to="/product"
+            onClick={closeMenu}
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Product
+          </NavLink>
+          <NavLink
+            to="/deals"
+            onClick={closeMenu}
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Deals
+          </NavLink>
+          <NavLink
+            to="/about"
+            onClick={closeMenu}
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            About
+          </NavLink>
+          <NavLink
+            to="/contact"
+            onClick={closeMenu}
+            className={({ isActive }) => (isActive ? "text-orange-700" : "")}
+          >
+            Contact
+          </NavLink>
+          <NavLink
+            to="/cart"
+            onClick={closeMenu}
+            className={({ isActive }) =>
+              `flex items-center gap-2 ${isActive ? "text-orange-700" : ""}`
+            }
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Cart
+            {itemCount > 0 && (
+              <span className="bg-blue-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
+            )}
+          </NavLink>
 
-          {/* Auth Buttons - Mobile */}
-          {!isLoggedIn ? (
+          {/* Auth Section - Mobile */}
+          {loading ? (
+            <div className="flex items-center gap-2 py-2">
+              <div className="w-6 h-6 bg-gray-200 rounded-full animate-pulse"></div>
+              <span className="text-gray-500">Loading...</span>
+            </div>
+          ) : !isAuthenticated ? (
             <>
-              <NavLink to="/login" onClick={closeMenu} className="text-blue-600">Login</NavLink>
-              <NavLink to="/signup" onClick={closeMenu} className="text-blue-600">Signup</NavLink>
+              <NavLink
+                to="/login"
+                onClick={closeMenu}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/signup"
+                onClick={closeMenu}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Sign Up
+              </NavLink>
             </>
           ) : (
-            <button  onClick={()=>{
-              handleLogout();
-              closeMenu();
-            }} className="text-red-600">Logout</button >
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 py-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-3 h-3 text-blue-600" />
+                </div>
+                <span className="text-gray-700 font-medium">
+                  {user?.user_metadata?.name ||
+                    user?.email?.split("@")[0] ||
+                    "User"}
+                </span>
+              </div>
+              <NavLink
+                to="/profile"
+                onClick={closeMenu}
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+              >
+                <Settings className="w-4 h-4" />
+                Profile
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
           )}
         </div>
       )}

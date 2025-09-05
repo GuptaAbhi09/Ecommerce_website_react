@@ -16,11 +16,10 @@ const AddProduct = () => {
 
       const fileName = `public/${Date.now()}_${file.name}`;
 
-      if (!file || !file.type.startsWith('image/')) {
-  toast.error("Please upload a valid image.");
-  return;
-}
-
+      if (!file || !file.type.startsWith("image/")) {
+        toast.error("Please upload a valid image.");
+        return;
+      }
 
       // Step 1: Upload image to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -76,21 +75,47 @@ const AddProduct = () => {
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center text-blue-600 underline">Add Product</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center text-blue-600 underline">
+        Add Product
+      </h1>
       <form
         className="space-y-4"
         onSubmit={handleSubmit(AddProductToDb)}
         encType="multipart/form-data"
       >
         {[
-          { label: "Product Name", name: "title", type: "text", required: true },
-          { label: "Description", name: "description", type: "text", required: true },
-          { label: "Price ($)", name: "price", type: "number", required: true },
-          { label: "Discount (%)", name: "discount_percentage", type: "number" },
+          {
+            label: "Product Name",
+            name: "title",
+            type: "text",
+            required: true,
+          },
+          {
+            label: "Description",
+            name: "description",
+            type: "text",
+            required: true,
+          },
+          {
+            label: "Price ($)",
+            name: "price",
+            type: "number",
+            required: true,
+          },
+          {
+            label: "Discount (%)",
+            name: "discount_percentage",
+            type: "number",
+          },
           { label: "Rating", name: "rating", type: "number", step: "0.01" },
           { label: "Stock", name: "stock", type: "number" },
           { label: "Brand", name: "brand", type: "text", required: true },
-          { label: "Category", name: "category", type: "text", required: true },
+          {
+            label: "Category",
+            name: "category",
+            type: "text",
+            required: true,
+          },
         ].map(({ label, name, type, required, step }) => (
           <div key={name} className="grid grid-cols-1 gap-2">
             <label className="font-medium">{label}</label>

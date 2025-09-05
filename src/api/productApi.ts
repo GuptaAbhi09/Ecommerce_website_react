@@ -1,11 +1,7 @@
 import { supabase } from "../utilsHelper/supabaseClient";
 
-
 export const getTopDeals = async () => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .limit(4);
+  const { data, error } = await supabase.from("products").select("*").limit(4);
   if (error) throw error;
   return data;
 };
@@ -20,9 +16,7 @@ export const getNewArrivals = async () => {
 };
 
 export const getAllProducts = async () => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*");
+  const { data, error } = await supabase.from("products").select("*");
   if (error) throw error;
   return data;
 };
